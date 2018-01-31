@@ -1,0 +1,44 @@
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+
+
+  \lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+  language=C++,
+  captionpos=b,
+  tabsize=3,
+  frame=lines,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  breaklines=true,
+  showstringspaces=false,
+  basicstyle=\footnotesize,
+%  identifierstyle=\color{magenta},
+  keywordstyle=\color[rgb]{0,0,1},
+  commentstyle=\color{Darkgreen},
+  stringstyle=\color{red}
+  }
+
+\newpage
+\section*{Appendix} \label{appendix}
+
+\subsection{Source Code}
+
+The source code and simulation data for the simulation can be found in the following github repository:
+\url{https://github.com/NikolaiT/PAK-Report-2}
+
+\subsection{Applying a RateErrorModel on the bottleneck link}\label{errorModel}
+\begin{lstlisting}
+DoubleValue rate (err_rate);
+Ptr<RateErrorModel> em1 =
+  CreateObjectWithAttributes<RateErrorModel> ("RanVar",
+   StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=1.0]"), "ErrorRate", rate);
+Ptr<RateErrorModel> em2 =
+  CreateObjectWithAttributes<RateErrorModel> ("RanVar",
+   StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=1.0]"), "ErrorRate", rate);
+
+thirdDevice.Get (0)->SetAttribute ("ReceiveErrorModel", PointerValue (em1));
+thirdDevice.Get (1)->SetAttribute ("ReceiveErrorModel", PointerValue (em2));
+\end{lstlisting}

@@ -1,0 +1,22 @@
+\tikzset{
+    >=stealth',
+    n0de/.style={
+           circle, 
+           draw=black,
+           minimum size=1cm,
+           text centered},
+}
+
+\begin{tikzpicture}[every node/.style={},auto,>=latex']
+
+\node[n0de](A){A};
+\node[n0de, below=1cm of A](B){B};
+\node[n0de](R)[right= 1cm of {$(A)!0.5!(B)$}]{R};
+\node[n0de](C)[right= 1cm of R]{C};
+
+\path[->] (A)  edge node {$L1$} (R);
+\path[->] (B)  edge node {$L2$} (R);
+\path[->] (R) edge node {$b$} (C);
+
+
+\end{tikzpicture}

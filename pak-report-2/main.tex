@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage{titling}
+\usepackage{enumitem} 
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{nameref}
+\usepackage{hyperref}
+\usepackage{float}
+\restylefloat{table}
+
+\usetikzlibrary{arrows,positioning,calc}
+
+
+\usepackage[utf8]{inputenc}
+
+%\setlength{\droptitle}{-10em} 
+
+\title{PAK: Report 2}
+\author{Nikolai Tschacher  \\
+	Humboldt-Universität zu Berlin, Germany  \\
+	tschachn@hu-berlin.de}
+
+\date{\today}
+% Hint: \title{what ever}, \author{who care} and \date{when ever} could stand 
+% before or after the \begin{document} command 
+% BUT the \maketitle command MUST come AFTER the \begin{document} command! 
+\begin{document}
+
+\maketitle
+
+
+%\begin{abstract}
+%Short introduction to subject of the paper \ldots 
+%\end{abstract}
+
+\section{Introduction} 
+In this report we are going to research the fairness between different combinations of TCP-Variants (especially their congestion mechanism). We will build a simple network topology consisting of four distinct nodes. There will be one bottleneck link in the topology. Two given TCP-Variants will compete for this bottleneck link. The simple topology is illustrated in figure \ref{fig:simpleYtopology}. We chose to compare two TCP New Reno and two Cubic connections. We will simulate TCP traffic over the bottleneck link using the network simulator NS-3. We are going to use version 3.26 in this report.
+
+\begin{figure}[H]
+\centering
+\let\clearpage\relax
+\include{./simpleYtopology}
+\caption{Two network nodes (A and B) sent traffic over the bottleneck \textit{b} to the sink C} \label{fig:simpleYtopology}
+\end{figure}
+
+\section{Analysis} \label{analysis}
+\let\clearpage\relax
+\input{./analysis}
+
+\section{Simulation} \label{simulation}
+Our simulation script is written in \emph{C++} and implemented within the discrete network simulator \emph{ns-3}. Our implementation source code are attached in the appendix.
+
+\paragraph{General assumptions:} The links $L1, L2$ send packets with a constant rate of 5Mbps. The RTT on $L1, L2$ may vary, we will simulate all latency combinations with latencys $(5ms, 10ms, 20ms, 50ms)$. Sender nodes (A and B) are sending packet frames  with a length of 1502 bytes (zero-byte arrays as TCP payload).\\\\
+The bottleneck link $b$ has a bandwith of 2Mbps, which is roughly half the bandwith of the links $L1, L2$ (Bandwith of 5Mbps). The transmit delay on the bottleneck link $b$ is set to 200 milliseconds (ms). Additionally, packets may get lost on both interfaces of the bottleneck link $b$. We make use of a error model, where packets get lost according a uniform random distribution. Each byte of a package gets lost or corrupted with probability $p_{err} = 0.000001$. 
+
+\paragraph{Source of randomness:} Scheduling sending packets is uniformly distributed by \texttt{"ns3::UniformRandomVariable[Min=0.0|Max=1.0]"} with a initial error rate of $p_{err} = 0.000001$. This error rate specifiys the probability of a single byte becoming corrupted at the incoming and outgoing device of the bottleneck link. How the corresponding source code looks like, can be seen in appendix \ref{errorModel}.
+
+\paragraph{Detecting flow fairness:} There are many different ways to calculate the fairness between different TCP variants. We are going to derive the fairness of the two TCP-Variants by comparing the reached data rates and by comparing the number of lost packets.\\\\
+We could find the lost/corrupted packets within the simulation script by using NS 3.23 and using a callback. Instead, we use another approach: We will analyze that \textit{pcap} files generated for each of our devices. By inspecting the \textit{pcap} files for node A, B and C we find out about TCP statistics via the Wireshark option Statistics -- Endpoints. Furthermore, when we calculate the difference of the number of \textit{Tx Packets} of the outgoing device from node A (respectively B) with the number of \textit{Rx Packets} of the network device of the sink node C, we find the number of packages that got corrupted or lost during the transmission.
+
+\paragraph{Simulation duration:} We chose the simulation time to be 200 seconds. Each simulation run will be repeated 5 times to even out simulation anomalys and get a sample size. The sample size should be larger, but unfortunately, we ran out of time.
+
+\paragraph{Simulation repetition and error:} Because we are working with a discrete event simulator, the randomness of our uniform random variable is predictable and with the same seeds always identical. Therefore we are going to repeat each simulation five times with different seeds to our uniform random variable. The seeds are chosen to be different corruption probabilites $p_{err} = (0.000001, 0.000002, 0.000003, 0.000004, 0.000005)$.
+
+\paragraph{Simulator configuration:} \emph{ns-3.26} with \emph{nsc-0.5.3} and some python3 scripts.
+
+
+ 
+\section{Simulation Cases} \label{results}
+
+\let\clearpage\relax
+\input{./cases}
+
+
+\section{Conclusion} \label{conclusion}
+According to the model, two competing TCP (NewReno) connections converge to a fair usage of bandwith, because if one connection currently sends more data, then this connection experiences higher losses. Additionally, because of multiplicative decrease, the faster connection loses more bandwith and converges to the same rate as the slower connection. We couldn't observe this behavior in our simulation of two NewReno connections, whereas the two cubic connections had about the same bandwith. Therefore, we are inclined to say that our simulation yielded the result, that two concurrent NewReno connections acted unfair and that cubic connections shared bandwith in a fair fashion. We assume however, that we may have introduced a non-obvious mistake in our simulation setup.\\
+We expected the rate of our throughput to be  reversly proportional to their RTT: $$\frac{R_A}{R_B} = \frac{RTT_B}{RTT_A} $$ It's obvious that our data doesn't show this relationship.\\\\
+Weak points of this report are the low number of sample sizes for simulation runs (N=5). Also we should have increased the RTT interval from $RTT=(5ms, 10ms, 20ms, 50ms)$ to $RTT=(5ms, 10ms, 20ms, 50ms, 100ms, 250ms, 500ms)$ to reveal underlying patters in a more significant way.
+
+
+%\begin{thebibliography}{9}
+%\bibitem[Doe]{doe} \emph{First and last \LaTeX{} example.},
+%John Doe 50 B.C. 
+%\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         APPENDIX        % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\let\clearpage\relax
+\input{./appendix}
+
+\end{document}

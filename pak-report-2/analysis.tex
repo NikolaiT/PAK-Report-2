@@ -1,0 +1,9 @@
+In the following section we will include the mathematical models underlying our simulation. Let $L1, L2, b$ be the data rates of the corresponding links in figure \ref{fig:simpleYtopology}. The latency on all links is variable. The MSS is equal for the two TCP-Connections. Package loss is introduced on both interfaces of link b. We make use of a error model where packets get lost according a uniform random distribution. The rate of one TCP connection is:
+
+$$R = \sqrt{\frac{3}{2} \cdot \frac{1}{p}} \cdot \frac{MSS}{RTT}$$
+
+When we put the rates of our TCP connections into relation we get:
+
+$$\frac{R_A}{R_B} = \frac{\sqrt{\frac{3}{2} \cdot \frac{1}{p}} \cdot \frac{MSS}{RTT_A}}{\sqrt{\frac{3}{2} \cdot \frac{1}{p}} \cdot \frac{MSS}{RTT_B}} = \frac{RTT_B}{RTT_A} $$
+
+The equation above puts the fraction of the achieved throuput in relation to their RTT. We see that the fraction of throuput is reversly proportional to their RTTs.
